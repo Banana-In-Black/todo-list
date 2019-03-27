@@ -31,11 +31,13 @@ const handleErr = (res, callback) => (err, apiRes) => {
     }
 };
 
+// initial todo list by google calendar events
 listEvents(handleErr(null, res => {
     const events = res.data.items;
     todoList = events.map(event2TodoAdapter);
 }));
 
+// Get todo list
 const allowedProps = ['id', 'summary', 'start', 'end'];
 router.get('/', (req, res) => res.send(todoList.map(todo => {
     return Object.keys(todo)
@@ -45,9 +47,13 @@ router.get('/', (req, res) => res.send(todoList.map(todo => {
             return obj;
         }, {});
 })));
+
+// Get a todo by ID
 router.get('/:id', (req, res) => res.send(
     todoList.find(todo => todo.id === req.params.id)
 ));
+
+// Delete a todo by ID
 router.delete('/:id', (req, res) => {
     const todoId = req.params.id;
     const index = todoList.findIndex(todo => todo.id === todoId);
@@ -60,6 +66,8 @@ router.delete('/:id', (req, res) => {
         res.send(undefined);
     }
 });
+
+// Create a todo
 router.post('/', (req, res) => {
     const event = todo2EventAdapter(req.body);
     insertEvent(event, handleErr(res, apiRes => {
