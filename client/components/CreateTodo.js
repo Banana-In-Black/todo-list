@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import request from 'superagent';
+import dateformat from 'dateformat';
 
 const CreateTodo = ({ addTodo }) => {
     const [formState, setFormState] = useState({});
@@ -14,12 +15,18 @@ const CreateTodo = ({ addTodo }) => {
         e.preventDefault();
         request
             .post('/todo')
-            .send(formState)
+            .send({
+                ...formState,
+                start: formState.start || dateformat(new Date(), 'yyyy-mm-dd'),
+                end: formState.end || dateformat(new Date(), 'yyyy-mm-dd')
+            })
             .then(res => {
                 addTodo(res.body);
+                // clear form
                 setFormState({
                     summary: '',
-                    date: '',
+                    start: '',
+                    end: '',
                     desc: ''
                 });
             });
@@ -27,7 +34,8 @@ const CreateTodo = ({ addTodo }) => {
     return (
         <form onSubmit={onSubmit}>
             Summary: <input name="summary" value={formState.summary} onChange={handleChange} /><br />
-            Date: <input type="date" name="date" value={formState.date} onChange={handleChange} /><br />
+            Start Date: <input type="date" name="start" value={formState.start} onChange={handleChange} /><br />
+            End Date: <input type="date" name="end" value={formState.end} onChange={handleChange} /><br />
             Desc: <textarea name="desc" value={formState.desc} onChange={handleChange} /><br />
             <button type="submit">Add</button>
         </form>

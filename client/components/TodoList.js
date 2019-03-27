@@ -3,7 +3,7 @@ import request from 'superagent';
 import Todo from './Todo';
 import CreateTodo from './CreateTodo';
 
-const Root = () => {
+const TodoList = () => {
     const [todoList, setTodoList] = useState([]);
 
     useEffect(() => {
@@ -33,4 +33,4 @@ const Root = () => {
     );
 };
 
-export default Root;
+export default React.memo(TodoList);

@@ -16,7 +16,8 @@ const Todo = ({ todo, removeTodo }) => {
     return (
         <li className="clickable" onClick={toggleOpen}>
             <div>Summary: {todo.summary}</div>
-            <div>Date: {dateformat(todo.date, 'fullDate')}</div>
+            <div>Start Date: {dateformat(todo.start, 'fullDate')}</div>
+            <div>End Date: {dateformat(todo.end, 'fullDate')}</div>
             {isOpen && <TodoDetail id={todo.id} />}
             <button onClick={onClick}>Delete</button>
         </li>
