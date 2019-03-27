@@ -2,8 +2,15 @@ import React, { useState, useCallback } from 'react';
 import request from 'superagent';
 import dateformat from 'dateformat';
 
+const initFormState = {
+    summary: '',
+    desc: '',
+    start: dateformat(new Date(), 'yyyy-mm-dd'),
+    end: dateformat(new Date(), 'yyyy-mm-dd')
+};
+
 const CreateTodo = ({ addTodo }) => {
-    const [formState, setFormState] = useState({});
+    const [formState, setFormState] = useState(initFormState);
     const handleChange = useCallback(e => {
         const target = e.target;
         setFormState(formState=> ({
@@ -22,13 +29,7 @@ const CreateTodo = ({ addTodo }) => {
             })
             .then(res => {
                 addTodo(res.body);
-                // clear form
-                setFormState({
-                    summary: '',
-                    start: '',
-                    end: '',
-                    desc: ''
-                });
+                setFormState(initFormState); // reset form
             });
     }, [formState, setFormState]);
     return (
