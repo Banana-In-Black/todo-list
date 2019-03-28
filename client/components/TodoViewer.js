@@ -9,8 +9,8 @@ const TodoViewer = ({ todo, todoOperation }) => {
     return (
         <li className="clickable" onClick={toggleOpen}>
             <div>Summary: {todo.summary}</div>
-            <div>Start Date: {dateformat(todo.start, 'fullDate')}</div>
-            <div>End Date: {dateformat(todo.end, 'fullDate')}</div>
+            <div>Start Date: {dateformat(todo.start, 'yyyy-mm-dd')}</div>
+            <div>End Date: {dateformat(todo.end, 'yyyy-mm-dd')}</div>
             {isOpen && <TodoDetail id={todo.id} todoOperation={todoOperation} />}
         </li>
     );

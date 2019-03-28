@@ -11,7 +11,7 @@ const TodoDetail = ({ id, todoOperation }) => {
     return (
         <div className="todo-detail">
             <div>Description: {todo.desc}</div>
-            <div>Created: {todo.created && dateformat(todo.created, 'fullDate')}</div>
+            <div>Created: {todo.created && dateformat(todo.created, 'yyyy-mm-dd')}</div>
         </div>
     );
 };

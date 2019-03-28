@@ -45,9 +45,9 @@ const TodoList = () => {
     const [todoList, setTodoList] = useState([]);
     const todoOp = useMemo(() => todoOperation(setTodoList), [setTodoList]);
 
-    useEffect(() => todoApi.list().then(
-        res => setTodoList(res.body))
-    , [setTodoList]);
+    useEffect(() => {
+        todoApi.list().then(setTodoList);
+    }, [setTodoList]);
     return (
         <React.Fragment>
             <TodoEditor action={todoOp.add} submitText="Add"/>
