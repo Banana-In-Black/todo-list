@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import request from 'superagent';
 import dateformat from 'dateformat';
 
-const TodoDetail = ({ id }) => {
+const TodoDetail = ({ id, todoOperation }) => {
     const [todo, setTodo] = useState({});
 
     useEffect(() => {
-        request
-            .get(`/todo/${id}`)
-            .then(res => setTodo(res.body));
-    }, [id]);
+        todoOperation.get(id).then(setTodo);
+    }, [id, todoOperation, setTodo]);
     
     return (
         <div className="todo-detail">

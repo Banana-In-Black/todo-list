@@ -10,7 +10,7 @@ const todoOperation = setter => {
     const update = todo => setter(
         todoList => {
             const todoId = todo.id;
-            const index = todoList.findIndex(todo => todo.id !== todoId);
+            const index = todoList.findIndex(todo => todo.id === todoId);
             if (index > -1) {
                 return [
                     ...todoList.slice(0, index),
@@ -34,12 +34,10 @@ const todoOperation = setter => {
         });
 
     return {
-        add: todo => todoApi.add(todo).then(
-            res => add(res.body)),
-        update: todo => todoApi.update(todo).then(
-            res => update(res.body)),
-        remove: id => todoApi.remove(id).then(
-            res => remove(res.body))
+        add: todo => todoApi.add(todo).then(add),
+        get: id => todoApi.get(id),
+        update: todo => todoApi.update(todo).then(update),
+        remove: id => todoApi.remove(id).then(remove)
     };
 };
 
@@ -52,10 +50,10 @@ const TodoList = () => {
     , [setTodoList]);
     return (
         <React.Fragment>
-            <TodoEditor addTodo={todoOp.add} />
+            <TodoEditor action={todoOp.add} submitText="Add"/>
             <ol>
-                { !!todoList.length && todoList.map(todo =>
-                    <Todo key={todo.id} todo={todo} updateTodo={todoOp.update} removeTodo={todoOp.remove} />) }
+                {!!todoList.length && todoList.map(todo =>
+                    <Todo key={todo.id} todo={todo} todoOperation={todoOp} />)}
             </ol>
         </React.Fragment>
     );

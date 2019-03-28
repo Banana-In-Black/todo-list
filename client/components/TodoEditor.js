@@ -8,8 +8,8 @@ const initFormState = {
     end: dateformat(new Date(), 'yyyy-mm-dd')
 };
 
-const TodoEditor = ({ addTodo, updateTodo }) => {
-    const [formState, setFormState] = useState(initFormState);
+const TodoEditor = ({ todo, action, onSubmit, submitText }) => {
+    const [formState, setFormState] = useState(todo || initFormState);
 
     const handleChange = useCallback(e => {
         const target = e.target;
@@ -19,7 +19,7 @@ const TodoEditor = ({ addTodo, updateTodo }) => {
         }));
     }, [setFormState]);
 
-    const toAddTodo = useCallback(e => {
+    const submitAction = useCallback(e => {
         e.preventDefault();
 
         const todo = {
@@ -27,16 +27,17 @@ const TodoEditor = ({ addTodo, updateTodo }) => {
             start: formState.start || dateformat(new Date(), 'yyyy-mm-dd'),
             end: formState.end || dateformat(new Date(), 'yyyy-mm-dd')
         };
-        addTodo(todo)
+        const promise = action(todo)
             .then(() => setFormState(initFormState));
-    }, [formState, setFormState]);
+        onSubmit && onSubmit(promise);
+    }, [formState, setFormState, action, onSubmit]);
     return (
-        <form onSubmit={toAddTodo}>
+        <form onSubmit={submitAction}>
             Summary: <input name="summary" value={formState.summary} onChange={handleChange} /><br />
             Start Date: <input type="date" name="start" value={formState.start} onChange={handleChange} /><br />
             End Date: <input type="date" name="end" value={formState.end} onChange={handleChange} /><br />
             Desc: <textarea name="desc" value={formState.desc} onChange={handleChange} /><br />
-            <button type="submit">Add</button>
+            <button type="submit">{submitText}</button>
         </form>
     );
 };
