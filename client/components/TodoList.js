@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import request from 'superagent';
 import Todo from './Todo';
-import CreateTodo from './CreateTodo';
+import TodoEditor from './TodoEditor';
+import request from 'superagent';
+import { get } from 'lodash-es';
 
 const TodoList = () => {
     const [todoList, setTodoList] = useState([]);
@@ -12,22 +13,50 @@ const TodoList = () => {
             .then(res => setTodoList(res.body));
     }, [setTodoList]);
 
-    const addTodo = useCallback(todo => setTodoList(todoList =>
-        [...todoList, todo]), [setTodoList]);
-    const removeTodo = useCallback(id => setTodoList(todoList => {        
-        const newTodoList = todoList.filter(todo => todo.id !== id);
-        if (newTodoList.length !== todoList.length) {
-            return newTodoList;
+    const addTodo = useCallback(todo => {
+        return request
+            .post('/todo')
+            .send(todo)
+            .then(res => 
+                setTodoList(todoList => [...todoList, res.body]));
+    }, [setTodoList]);
+
+    const updateTodo = useCallback(todo => setTodoList(todoList => {
+        const todoId = todo.id;
+        const index = todoList.findIndex(todo => todo.id !== todoId);
+        if (index > -1) {
+            return [
+                ...todoList.slice(0, index),
+                {
+                    ...todoList[index],
+                    ...todo
+                },
+                ...todoList.slice(index + 1)
+            ];
         } else {
             return todoList;
         }
     }), [setTodoList]);
+
+    const removeTodo = useCallback(id => {
+        return request
+            .delete(`/todo/${id}`)
+            .then(res => {
+                setTodoList(todoList => {
+                    const deletedTodoId = get(res.body, 'id');
+                    const newTodoList = todoList.filter(todo => todo.id !== deletedTodoId);
+                    return newTodoList.length !== todoList.length
+                        ? newTodoList
+                        : todoList;
+                });
+            });
+    }, [setTodoList]);
     return (
         <React.Fragment>
-            <CreateTodo addTodo={addTodo} />
+            <TodoEditor addTodo={addTodo} />
             <ol>
                 { !!todoList.length && todoList.map(todo =>
-                    <Todo key={todo.id} todo={todo} removeTodo={removeTodo} />) }
+                    <Todo key={todo.id} todo={todo} updateTodo={updateTodo} removeTodo={removeTodo} />) }
             </ol>
         </React.Fragment>
     );
