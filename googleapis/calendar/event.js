@@ -32,6 +32,20 @@ function insertEvent(auth, callback, event) {
 }
 
 /**
+ * Update a calendar event.
+ * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
+ * @param {Function} callback Response callback, including error.
+ * @param {Object} event An object represent google calendar event.
+ */
+function updateEvent(auth, callback, event) {
+    eventsApi(auth).update({
+        calendarId,
+        eventId: event.id,
+        resource: event
+    }, callback);
+}
+
+/**
  * Delete a calendar event.
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  * @param {Function} callback Response callback, including error.
@@ -47,5 +61,6 @@ function deleteEvent(auth, callback, eventId) {
 module.exports = {
     listEvents: callback => authorize(auth => listEvents(auth, callback)),
     insertEvent: (event, callback) => authorize(auth => insertEvent(auth, callback, event)),
+    updateEvent: (event, callback) => authorize(auth => updateEvent(auth, callback, event)),
     deleteEvent: (eventId, callback) => authorize(auth => deleteEvent(auth, callback, eventId))
 };

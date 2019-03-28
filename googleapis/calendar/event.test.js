@@ -1,40 +1,41 @@
-const { listEvents, insertEvent, deleteEvent } = require('./event');
+const { listEvents, insertEvent, updateEvent, deleteEvent } = require('./event');
 
 const dateISOStringRegex = () => /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}/;
 const dateRegex = () => /\d{4}-\d{2}-\d{2}/;
+const event = {
+    summary: 'create event',
+    description: 'create event by jest',
+    start: { date: '2019-03-30' },
+    end: { date: '2019-03-30' }
+};
+
+let lastCreatedEvent;
+const insertEventUntil = done => {
+    insertEvent(event, (err, res) => {
+        if (!err) {
+            expect(res.data).toMatchObject({
+                ...event,
+                id: expect.any(String),
+                created: expect.stringMatching(dateISOStringRegex())
+            });
+            lastCreatedEvent = res.data;
+            done();
+        }
+    });
+};
+const deleteEventUntil = done => {
+    deleteEvent(lastCreatedEvent.id, (err, res) => {
+        if (!err) {
+            expect(res.status).toBe(204);
+            expect(res.data).toBeFalsy();
+            done();
+        }
+    });
+};
 
 describe('Google Calendar API: Create & Delete an event', () => {
-    const event = {
-        summary: 'create event',
-        description: 'create event by jest',
-        start: { date: '2019-03-30' },
-        end: { date: '2019-03-30' }
-    };
-
-    let createdEvent;
-    test('Create an event', done => {
-        insertEvent(event, (err, res) => {
-            if (!err) {
-                expect(res.data).toMatchObject({
-                    ...event,
-                    id: expect.any(String),
-                    created: expect.stringMatching(dateISOStringRegex())
-                });
-                createdEvent = res.data;
-                done();
-            }
-        });
-    });
-
-    test('Delete an event', done => {
-        deleteEvent(createdEvent.id, (err, res) => {
-            if (!err) {
-                expect(res.status).toBe(204);
-                expect(res.data).toBeFalsy();
-                done();
-            }
-        });
-    });
+    test('Create an event', done => insertEventUntil(done));
+    test('Delete an event', done => deleteEventUntil(done));
 
     test('Create an event without start date', done => {
         insertEvent({ ...event, start: null }, (err) => {
@@ -62,5 +63,25 @@ test('Google Calendar API: List all events of primary calendar', done => {
             });
             done();
         }
+    });
+});
+
+describe('Google Calendar API: Update an event', () => {
+    beforeEach(done => insertEventUntil(done));
+    afterEach(done => deleteEventUntil(done));
+
+    test('Update an event', done => {
+        const newEvent = {
+            ...event,
+            id: lastCreatedEvent.id,
+            description: 'Was updated by another request. woo!'
+        };
+        updateEvent(newEvent,
+            (err, res) => {
+                if (!err) {
+                    expect(res.data).toMatchObject(newEvent);
+                    done();
+                }
+            });
     });
 });

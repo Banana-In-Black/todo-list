@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { listEvents, insertEvent, deleteEvent } = require('../googleapis/calendar/event');
+const { listEvents, insertEvent, updateEvent, deleteEvent } = require('../googleapis/calendar/event');
 
-let todoList;
+let todoList = [];
 
 const event2TodoAdapter = event => ({
     id: event.id,
@@ -32,27 +32,50 @@ const handleErr = (res, callback) => (err, apiRes) => {
     }
 };
 
-// initial todo list by google calendar events
-listEvents(handleErr(null, res => {
-    const events = res.data.items;
-    todoList = events.map(event2TodoAdapter);
-}));
-
 // Get todo list
 const allowedProps = ['id', 'summary', 'start', 'end'];
-router.get('/', (req, res) => res.send(todoList.map(todo => {
-    return Object.keys(todo)
-        .filter(key => allowedProps.includes(key))
-        .reduce((obj, key) => {
-            obj[key] = todo[key];
-            return obj;
-        }, {});
-})));
+router.get('/', (req, res) => {
+    listEvents(handleErr(null, gRes => {
+        const events = gRes.data.items;
+        todoList = events.map(event2TodoAdapter);
+        res.send(todoList.map(todo => {
+            return Object.keys(todo)
+            .filter(key => allowedProps.includes(key))
+            .reduce((obj, key) => {
+                obj[key] = todo[key];
+                return obj;
+            }, {});
+        }));
+    }));
+});
+
+// Create a todo
+router.post('/', (req, res) => {
+    const event = todo2EventAdapter(req.body);
+    insertEvent(event, handleErr(res, apiRes => {
+        const todo = event2TodoAdapter(apiRes.data);
+        todoList.push(todo);
+        res.send(todo);
+    }));
+});
 
 // Get a todo by ID
 router.get('/:id', (req, res) => res.send(
     todoList.find(todo => todo.id === req.params.id)
 ));
+
+// Update a todo by ID
+router.put('/:id', (req, res) => {
+    const event = todo2EventAdapter(req.body);
+    updateEvent(event, handleErr(res, apiRes => {
+        const todo = event2TodoAdapter(apiRes.data);
+        const todoId = todo.id;
+        Object.assign(
+            todoList.find(todo => todo.id === todoId), todo);
+        console.log('Updated todo', todo);
+        res.send(todo);
+    }));
+});
 
 // Delete a todo by ID
 router.delete('/:id', (req, res) => {
@@ -66,16 +89,6 @@ router.delete('/:id', (req, res) => {
     } else {
         res.send(undefined);
     }
-});
-
-// Create a todo
-router.post('/', (req, res) => {
-    const event = todo2EventAdapter(req.body);
-    insertEvent(event, handleErr(res, apiRes => {
-        const todo = event2TodoAdapter(apiRes.data);
-        todoList.push(todo);
-        res.send(todo);
-    }));
 });
 
 module.exports = router;
