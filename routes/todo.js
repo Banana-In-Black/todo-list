@@ -27,6 +27,7 @@ const handleErr = (res, callback) => (err, apiRes) => {
         console.error('The API returned an error: ' + err);
         res && res.sendStatus(500);
     } else {
+        console.log(apiRes);
         callback(apiRes);
     }
 };

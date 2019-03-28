@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "build": "webpack -p"
+    "build": "webpack -p",
+    "test": "jest"
   },
   "dependencies": {
     "cookie-parser": "~1.4.3",
@@ -30,6 +31,7 @@
     "eslint-plugin-import": "^2.16.0",
     "eslint-plugin-react": "^7.12.4",
     "eslint-watch": "^5.0.1",
+    "jest": "^24.5.0",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.3.0"
   },
